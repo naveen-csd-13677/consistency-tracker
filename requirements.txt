@@ -1,0 +1,6 @@
+fastapi
+sqlalchemy
+pydantic
+openai
+anthropic
+google-generativeai
