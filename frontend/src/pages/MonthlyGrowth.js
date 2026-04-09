@@ -64,7 +64,7 @@ export default function MonthlyGrowth() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-semibold text-lg">{g.goal_name}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Current: {g.previous_duty}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Duty: {g.previous_duty}</p>
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold font-mono">{g.current_consistency_pct}%</div>

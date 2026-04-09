@@ -15,7 +15,7 @@ async function request(path, options = {}) {
 }
 
 // Goals
-export const getGoals = (status) => request(`/goals/${status ? `?status=${status}` : ''}`);
+export const getGoals = (status) => request(`/goals/${status ? `?status=${encodeURIComponent(status)}` : ''}`);
 export const createGoal = (data) => request('/goals/', { method: 'POST', body: JSON.stringify(data) });
 export const getGoal = (id) => request(`/goals/${id}`);
 export const updateGoal = (id, data) => request(`/goals/${id}`, { method: 'PUT', body: JSON.stringify(data) });
