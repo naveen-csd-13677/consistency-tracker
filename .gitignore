@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Node.js
+node_modules/
+
+# Environment variables
+.env
+.venv/
+
+# Build and Distribution
+build/
+dist/
+
+# IDE files
+.idea/
+*.sublime-*
