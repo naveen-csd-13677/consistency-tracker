@@ -1,5 +1,7 @@
 """FastAPI main application."""
 
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -14,15 +16,20 @@ from app.api.endpoints import (
     config,
     export,
     dashboard,
+    insights,
 )
 
-# Create database tables
+logger = logging.getLogger(__name__)
+
+# Create database tables (fallback for development; prefer Alembic migrations in production)
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Personal Consistency Tracker",
     description="Track daily habits, compute consistency metrics, manage progressive difficulty upgrades, and get AI-powered suggestions.",
     version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
 # CORS middleware for frontend
@@ -44,6 +51,7 @@ app.include_router(suggestions.router)
 app.include_router(config.router)
 app.include_router(export.router)
 app.include_router(dashboard.router)
+app.include_router(insights.router)
 
 
 @app.get("/api/health")

@@ -1,17 +1,29 @@
 """Upgrades API endpoints."""
 
+from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.goal import DifficultyLevel, Goal
 from app.models.upgrade import UpgradeHistory
 from app.schemas.upgrade import UpgradeCreate, UpgradeReadiness, UpgradeResponse
-from app.services.upgrade import check_all_upgrade_readiness, execute_upgrade
+from app.services.upgrade import (
+    check_all_upgrade_readiness,
+    check_downgrade_suggestions,
+    evaluate_post_upgrade_consistency,
+    execute_upgrade,
+    rollback_upgrade,
+)
 
 router = APIRouter(prefix="/api/upgrades", tags=["upgrades"])
+
+
+class RollbackRequest(BaseModel):
+    notes: Optional[str] = None
 
 
 @router.get("/", response_model=list[UpgradeResponse])
@@ -45,6 +57,37 @@ def create_upgrade(upgrade_in: UpgradeCreate, db: Session = Depends(get_db)):
 def get_readiness(db: Session = Depends(get_db)):
     """Get current upgrade readiness status for all active goals."""
     return check_all_upgrade_readiness(db)
+
+
+@router.get("/downgrade-suggestions")
+def get_downgrade_suggestions(db: Session = Depends(get_db)):
+    """Check for goals that should be suggested for downgrade (UL-01).
+
+    Returns goals where post-upgrade consistency < 60% for 2 consecutive weeks.
+    """
+    return check_downgrade_suggestions(db)
+
+
+@router.post("/evaluate")
+def evaluate_upgrades(db: Session = Depends(get_db)):
+    """Evaluate post-upgrade consistency for upgrades older than 1 week.
+
+    This calculates consistency_after and assigns status (Good/Watch/Failed).
+    """
+    return evaluate_post_upgrade_consistency(db)
+
+
+@router.post("/{upgrade_id}/rollback", response_model=UpgradeResponse)
+def rollback(
+    upgrade_id: UUID,
+    body: RollbackRequest | None = None,
+    db: Session = Depends(get_db),
+):
+    """Rollback an upgrade — revert goal to previous duty and difficulty (UL-02)."""
+    result = rollback_upgrade(db, upgrade_id, notes=body.notes if body else None)
+    if not result:
+        raise HTTPException(status_code=404, detail="Upgrade not found")
+    return result
 
 
 @router.get("/{upgrade_id}", response_model=UpgradeResponse)
