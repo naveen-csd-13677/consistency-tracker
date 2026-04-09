@@ -1,1 +1,39 @@
-version: '3.8'\n\nservices:\n  backend:\n    image: tiangolo/uvicorn-gunicorn-fastapi:python3.8\n    ports:\n      - '8000:80'\n    volumes:\n      - './backend:/app'\n    environment:\n      - DATABASE_URL=postgresql://user:password@db:5432/dbname\n\n  frontend:\n    build: ./frontend\n    ports:\n      - '3000:3000'\n    volumes:\n      - './frontend:/app'\n\n  db:\n    image: postgres:latest\n    volumes:\n      - db_data:/var/lib/postgresql/data\n    environment:\n      - POSTGRES_USER=user\n      - POSTGRES_PASSWORD=password\n      - POSTGRES_DB=dbname\n\nvolumes:\n  db_data:
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - '8000:8000'
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/dbname
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://localhost:11434}
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - '3000:3000'
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  db:
+    image: postgres:15
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=dbname
+    ports:
+      - '5432:5432'
+    restart: unless-stopped
+
+volumes:
+  db_data:
