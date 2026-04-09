@@ -73,20 +73,22 @@ export default function DailyLog() {
       <h1 className="text-2xl font-bold">Daily Log</h1>
 
       {/* Date Navigation */}
-      <div className="flex items-center gap-4">
-        <button onClick={() => changeDate(-1)} className="btn-secondary">← Prev</button>
+      <div className="flex items-center gap-4" role="navigation" aria-label="Date navigation">
+        <button onClick={() => changeDate(-1)} className="btn-secondary" aria-label="Previous day">← Prev</button>
+        <label htmlFor="log-date-input" className="sr-only">Select date</label>
         <input
+          id="log-date-input"
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
           className="input-field max-w-xs"
         />
-        <button onClick={() => changeDate(1)} className="btn-secondary">Next →</button>
+        <button onClick={() => changeDate(1)} className="btn-secondary" aria-label="Next day">Next →</button>
         <button onClick={() => setDate(formatDate(new Date()))} className="btn-secondary">Today</button>
       </div>
 
       {/* Overall Stats */}
-      <div className="card">
+      <div className="card" role="status" aria-label={`Daily consistency: ${overallPct}%, ${completedCount} of ${totalGoals} goals completed`}>
         <div className="flex items-center justify-between">
           <div>
             <span className="text-lg font-semibold">Overall: </span>
@@ -106,25 +108,27 @@ export default function DailyLog() {
 
       {/* Goals Checklist */}
       {loading ? (
-        <div className="text-center py-8 text-gray-500">Loading...</div>
+        <div className="text-center py-8 text-gray-500" role="status">Loading...</div>
       ) : goals.length === 0 ? (
         <div className="card text-center py-8 text-gray-500">
           No active goals. <a href="/goals" className="text-indigo-600 hover:underline">Create some goals first!</a>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3" role="list" aria-label="Goals checklist">
           {goals.map(goal => {
             const log = getLogForGoal(goal.id);
             const completed = log?.completed || false;
             const isSaving = saving[goal.id];
 
             return (
-              <div key={goal.id} className="card">
+              <div key={goal.id} className="card" role="listitem">
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => toggleCompletion(goal.id, !completed)}
                     disabled={isSaving}
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-xl transition-all ${
+                    aria-label={`Mark ${goal.name} as ${completed ? 'not done' : 'done'}`}
+                    aria-pressed={completed}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center text-xl transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
                       completed
                         ? 'bg-green-500 text-white shadow-lg shadow-green-200 dark:shadow-green-900'
                         : 'bg-gray-200 dark:bg-gray-600 text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-500'
@@ -143,7 +147,9 @@ export default function DailyLog() {
                 </div>
                 {/* Notes */}
                 <div className="mt-3">
+                  <label htmlFor={`note-${goal.id}`} className="sr-only">Note for {goal.name}</label>
                   <input
+                    id={`note-${goal.id}`}
                     type="text"
                     placeholder="Add a note..."
                     value={notes[goal.id] || ''}

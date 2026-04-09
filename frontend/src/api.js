@@ -56,11 +56,17 @@ export const getMonthlyAnalytics = (params) => {
 export const getUpgrades = (goalId) => request(`/upgrades/${goalId ? `?goal_id=${goalId}` : ''}`);
 export const createUpgrade = (data) => request('/upgrades/', { method: 'POST', body: JSON.stringify(data) });
 export const getUpgradeReadiness = () => request('/upgrades/readiness');
+export const rollbackUpgrade = (id, data) => request(`/upgrades/${id}/rollback`, { method: 'POST', body: JSON.stringify(data || {}) });
+export const evaluateUpgrades = () => request('/upgrades/evaluate', { method: 'POST' });
+export const getDowngradeSuggestions = () => request('/upgrades/downgrade-suggestions');
 
 // Suggestions
 export const getSuggestions = () => request('/suggestions/');
 export const getSuggestion = (goalId) => request(`/suggestions/${goalId}`);
 export const generateSuggestions = () => request('/suggestions/generate', { method: 'POST' });
+
+// Insights
+export const getInsights = () => request('/insights/');
 
 // Config
 export const getConfig = () => request('/config/');
